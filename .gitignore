@@ -1,0 +1,6 @@
+*.pyc
+*.egg-info/
+dist/
+tmp/
+venv/
+credentials.ini
