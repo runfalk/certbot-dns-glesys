@@ -1,4 +1,4 @@
-Loopia DNS Authenticator for Certbot
+GleSYS DNS Authenticator for Certbot
 ====================================
 This allows automatic completion of `Certbot's <https://github.com/certbot/certbot>`_
 DNS01 challange for domains managed on `GleSYS <https://www.glesys.com/>`_ DNS.
@@ -44,4 +44,5 @@ running:
 
 Disclaimer
 ----------
-This plugin is neither affiliated with nor endorsed by GleSYS AB.
+This plugin is neither affiliated with nor endorsed by GleSYS Internet Services
+AB.
