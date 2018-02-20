@@ -31,7 +31,7 @@ GlesysRecord = namedtuple("GlesysRecord", [
 
 
 class GlesysDomainApiClient(object):
-    base_url = u" https://api.glesys.com/"
+    base_url = u"https://api.glesys.com/"
 
     def __init__(self, username, password):
         self._client = Session()
