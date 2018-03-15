@@ -109,8 +109,8 @@ class GlesysAuthenticator(DNSAuthenticator):
         self.credentials = None
 
     @classmethod
-    def add_parser_arguments(cls, add):
-        super(GlesysAuthenticator, cls).add_parser_arguments(add)
+    def add_parser_arguments(cls, add, default_propagation_seconds=90):
+        super(GlesysAuthenticator, cls).add_parser_arguments(add, default_propagation_seconds)
         add("credentials", help="GleSYS API credentials INI file.")
 
     def more_info(self):
