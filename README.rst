@@ -46,3 +46,24 @@ Disclaimer
 ----------
 This plugin is neither affiliated with nor endorsed by GleSYS Internet Services
 AB.
+
+
+Changelog
+=========
+
+
+Version 0.1.1
+-------------
+Released on 15th March, 2018
+
+- Bumped default propagation time to 90 seconds to improve reliability
+- Fixed wrong base url in ``GlesysDomainApiClient``, pull request
+  `#2 <https://github.com/runfalk/certbot-glesys/pull/2>`_
+  (`@montaniasystemab <https://github.com/montaniasystemab>`_)
+
+
+Version 0.1.0
+-------------
+Released on 30th September, 2017
+
+- Initial release
