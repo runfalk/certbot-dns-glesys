@@ -14,11 +14,6 @@ from requests.auth import HTTPBasicAuth
 logger = logging.getLogger(__name__)
 
 
-def split_domain(domain):
-    # TODO: This doesn't work for domains like .co.uk
-    parts = domain.rsplit(".", 2)
-    return ".".join(parts[-2:]), ".".join(parts[:-2]) or "@"
-
 def remove_subdomain(domainname):
     idx = domainname.find(".")
     if idx == -1:
