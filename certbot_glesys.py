@@ -19,6 +19,13 @@ def split_domain(domain):
     parts = domain.rsplit(".", 2)
     return ".".join(parts[-2:]), ".".join(parts[:-2]) or "@"
 
+def remove_subdomain(domainname):
+    idx = domainname.find(".")
+    if idx == -1:
+        raise ValueError('Already at TLD')
+
+    return domainname[idx+1:]
+
 
 GlesysRecord = namedtuple("GlesysRecord", [
     "id",
@@ -87,6 +94,17 @@ class GlesysDomainApiClient(object):
             "recordid": record_id,
         })
 
+    def domain_exists(self, domainname):
+        xml = self._request("domain", "list")
+
+        for item in xml.xpath("/response/domains/item"):
+            attrs = {node.tag: node.text for node in item}
+
+            if attrs["domainname"] == domainname:
+                return True
+
+        return False
+
 
 @zope.interface.implementer(IAuthenticator)
 @zope.interface.provider(IPluginFactory)
@@ -137,7 +155,14 @@ class GlesysAuthenticator(DNSAuthenticator):
 
     def _perform(self, domain, validation_name, validation):
         glesys = self._get_glesys_client()
-        domain, subdomain = split_domain(validation_name)
+
+        try:
+            while not glesys.domain_exists(domain):
+                domain = remove_subdomain(domain)
+        except ValueError as e:
+            raise ValueError("can't find domain in glesys cp")
+
+        subdomain = validation_name.replace(domain, "")
 
         msg = u"Creating TXT record for {domain} on subdomain {subdomain}"
         logger.debug(msg.format(domain=domain, subdomain=subdomain))
@@ -152,7 +177,14 @@ class GlesysAuthenticator(DNSAuthenticator):
 
     def _cleanup(self, domain, validation_name, validation):
         glesys = self._get_glesys_client()
-        domain, subdomain = split_domain(validation_name)
+
+        try:
+            while not glesys.domain_exists(domain):
+                domain = remove_subdomain(domain)
+        except ValueError as e:
+            raise ValueError("can't find domain in glesys cp")
+
+        subdomain = validation_name.replace(domain, "")
 
         subdomain_to_id = {
             record.subdomain: record.id
