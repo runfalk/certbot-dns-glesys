@@ -15,6 +15,7 @@ Usage
 -----
 Create an API key with the following permissions:
 
+- ``domain:list``
 - ``domain:listrecords``
 - ``domain:addrecord``
 - ``domain:deleterecord``
@@ -41,6 +42,19 @@ running:
 
    $ chmod 600 credentials.ini
 
+Then you can run ``certbot`` using:
+
+.. code-block::
+
+   $ certbot certonly \
+       --authenticator certbot-glesys:auth \
+       --certbot-glesys:auth-credentials credentials.ini \
+       -d domain.com
+
+If you want to obtain a wildcard certificate you can use the
+``--server https://acme-v02.api.letsencrypt.org/directory`` flag and the domain
+``-d *.domain.com``.
+
 
 Disclaimer
 ----------
@@ -50,6 +64,17 @@ AB.
 
 Changelog
 =========
+
+Version 0.2.0
+-------------
+Released on 23rd April 2018
+
+**This is a breaking change since it requires the** ``domain:list``
+**permission.**
+
+- Added proper support for sub domain guessing, pull request
+  `#4 <https://github.com/runfalk/certbot-glesys/pull/4>`_
+  (`@Lillecarl <https://github.com/Lillecarl>`_)
 
 
 Version 0.1.1

@@ -9,7 +9,7 @@ except:
 
 setup(
     name="certbot-glesys",
-    version="0.1.1",
+    version="0.2.0",
     description="GleSYS DNS authentication plugin for Certbot",
     long_description=long_desc,
     license="BSD",

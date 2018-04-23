@@ -14,12 +14,21 @@ from requests.auth import HTTPBasicAuth
 logger = logging.getLogger(__name__)
 
 
-def remove_subdomain(domainname):
-    idx = domainname.find(".")
-    if idx == -1:
-        raise ValueError('Already at TLD')
+class DomainParts(namedtuple("DomainParts", ["domain", "subdomain"])):
+    def __new__(cls, domain, subdomain=None):
+        return super(DomainParts, cls).__new__(cls, domain, subdomain)
 
-    return domainname[idx+1:]
+    def iter_variants(self):
+        sub_parts = []
+        if self.subdomain is not None:
+            sub_parts = self.subdomain.split(".")
+
+        parts = self.domain.split(".")
+        for i in range(len(parts)):
+            yield DomainParts(
+                ".".join(parts[i:]),
+                ".".join(sub_parts + parts[:i]) or None,
+            )
 
 
 GlesysRecord = namedtuple("GlesysRecord", [
@@ -89,16 +98,26 @@ class GlesysDomainApiClient(object):
             "recordid": record_id,
         })
 
-    def domain_exists(self, domainname):
+    def list_domains(self):
+        """Return an iterator of domain names manageable by the current user"""
         xml = self._request("domain", "list")
+        for item in xml.xpath("/response/domains/item/domainname"):
+            yield item.text
 
-        for item in xml.xpath("/response/domains/item"):
-            attrs = {node.tag: node.text for node in item}
+    def split_domain(self, domain):
+        """
+        Split the domain into a DomainParts object.
 
-            if attrs["domainname"] == domainname:
-                return True
+        The returned domain is guaranteed to exist on GleSYS. If the domain is
+        not available this will raise ValueError.
+        """
+        domains = list(self.list_domains())
+        for dp in DomainParts(domain).iter_variants():
+            if dp.domain not in domains:
+                continue
+            return dp
 
-        return False
+        raise ValueError("Unable to find domain in GleSYS control panel")
 
 
 @zope.interface.implementer(IAuthenticator)
@@ -127,10 +146,7 @@ class GlesysAuthenticator(DNSAuthenticator):
         add("credentials", help="GleSYS API credentials INI file.")
 
     def more_info(self):
-        """
-        More in-depth description of the plugin.
-        """
-
+        """More in-depth description of the plugin."""
         return "\n".join(line[4:] for line in __doc__.strip().split("\n"))
 
     def _setup_credentials(self):
@@ -146,25 +162,23 @@ class GlesysAuthenticator(DNSAuthenticator):
     def _get_glesys_client(self):
         return GlesysDomainApiClient(
             self.credentials.conf("user"),
-            self.credentials.conf("password"))
+            self.credentials.conf("password"),
+        )
 
     def _perform(self, domain, validation_name, validation):
         glesys = self._get_glesys_client()
 
-        try:
-            while not glesys.domain_exists(domain):
-                domain = remove_subdomain(domain)
-        except ValueError as e:
-            raise ValueError("can't find domain in glesys cp")
-
-        subdomain = validation_name.replace(domain, "")
+        domain_parts = glesys.split_domain(validation_name)
 
         msg = u"Creating TXT record for {domain} on subdomain {subdomain}"
-        logger.debug(msg.format(domain=domain, subdomain=subdomain))
+        logger.debug(msg.format(
+            domain=domain_parts.domain,
+            subdomain=domain_parts.subdomain,
+        ))
 
         glesys.add_record(
-            domain=domain,
-            subdomain=subdomain,
+            domain=domain_parts.domain,
+            subdomain=domain_parts.subdomain,
             type="TXT",
             data=validation,
             ttl=self.ttl,
@@ -173,23 +187,19 @@ class GlesysAuthenticator(DNSAuthenticator):
     def _cleanup(self, domain, validation_name, validation):
         glesys = self._get_glesys_client()
 
-        try:
-            while not glesys.domain_exists(domain):
-                domain = remove_subdomain(domain)
-        except ValueError as e:
-            raise ValueError("can't find domain in glesys cp")
-
-        subdomain = validation_name.replace(domain, "")
+        domain_parts = glesys.split_domain(validation_name)
+        msg = "Removing TXT record for domain {domain} on subdomain {subdomain}"
+        logger.debug(msg.format(
+            domain=domain_parts.domain,
+            subdomain=domain_parts.subdomain,
+        ))
 
         subdomain_to_id = {
             record.subdomain: record.id
-            for record in glesys.list_records(domain)
+            for record in glesys.list_records(domain_parts.domain)
             if record.type == "TXT" and record.data == validation
         }
 
-        msg = "Removing TXT record for domain {domain} on subdomain {subdomain}"
-        logger.debug(msg.format(domain=domain, subdomain=subdomain))
-
-        record_id = subdomain_to_id[subdomain]
+        record_id = subdomain_to_id[domain_parts.subdomain]
         logger.debug("Removing record ID {}".format(record_id))
         glesys.remove_record(record_id)
