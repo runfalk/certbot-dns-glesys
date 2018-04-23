@@ -19,7 +19,7 @@ Create an API key with the following permissions:
 - ``domain:addrecord``
 - ``domain:deleterecord``
 
-Don't forget to give access to the appropriate IP-address range. If you wan't
+Don't forget to give access to the appropriate IP-address range. If you want
 to be able to run the client from anywhere, enter ``0.0.0.0/0``.
 
 To use the authenticator you need to provide some required options:
