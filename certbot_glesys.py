@@ -47,6 +47,7 @@ class GlesysDomainApiClient(object):
     def __init__(self, username, password):
         self._client = Session()
         self._client.auth = HTTPBasicAuth(username, password)
+        self._client.headers.update({"Accept": "application/xml"})
 
     def _request(self, type, action, data=None):
         url = u"{}/{}/{}/".format(self.base_url, type, action)
