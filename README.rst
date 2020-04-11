@@ -6,9 +6,35 @@ DNS01 challange for domains managed on `GleSYS <https://www.glesys.com/>`_ DNS.
 
 Installing
 ----------
+Installation of Certbot plugins are a bit tricky. The least bad way is to create
+a Python virtual environment as *root* and install it there.
+
 .. code-block::
 
+   $ cd /root/
+   $ python3 -m venv --prompt=certbot certbot
+   $ source certbot/bin/activate
+   $ pip install --upgrade pip setuptools
    $ pip install certbot-glesys
+
+You can now run Certbot using ``/root/certbot/bin/certbot``.
+
+If you use Fedora like me I have prepared
+`an RPM <https://github.com/runfalk/certbot-glesys/releases>`_ you can use
+instead.
+
+.. code-block::
+
+   $ sudo rpm -i https://github.com/runfalk/certbot-glesys/releases/download/1.0.0/python3-certbot-dns-glesys-1.0.0-1.fedora31.noarch.rpm
+
+If you use another RPM based distribution you may be able to build it yourself.
+
+.. code-block::
+
+   $ source /etc/os-release
+   $ python setup.py bdist_rpm --release="1.${ID}${VERSION_ID}"
+
+PRs are welcome for other distributions.
 
 
 Usage
@@ -64,6 +90,15 @@ AB.
 
 Changelog
 =========
+
+Version 1.0.0
+-------------
+Released 11th April 2020
+
+- Changed to GleSYS JSON API
+- Added RPM as an installation option
+- Dropped support for EOL Python versions
+
 
 Version 0.2.0
 -------------

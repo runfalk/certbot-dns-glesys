@@ -1,3 +1,5 @@
+import os
+
 from setuptools import setup
 
 
@@ -8,8 +10,8 @@ except:
     long_desc = None
 
 setup(
-    name="certbot-glesys",
-    version="0.2.0",
+    name=os.environ.get("PKG_NAME_OVERRIDE", "certbot-glesys"),
+    version="1.0.0",
     description="GleSYS DNS authentication plugin for Certbot",
     long_description=long_desc,
     license="BSD",
@@ -29,16 +31,16 @@ setup(
         ],
     },
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Plugins",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Internet :: Name Service (DNS)",
         "Topic :: System :: Systems Administration",
         "Topic :: Utilities",
