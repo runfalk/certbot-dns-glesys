@@ -6,7 +6,6 @@ import zope.interface
 from certbot.plugins.dns_common import DNSAuthenticator
 from certbot.interfaces import IAuthenticator, IPluginFactory
 from collections import namedtuple
-from lxml import etree
 from requests import Session
 from requests.auth import HTTPBasicAuth
 
@@ -47,37 +46,36 @@ class GlesysDomainApiClient(object):
     def __init__(self, username, password):
         self._client = Session()
         self._client.auth = HTTPBasicAuth(username, password)
+        self._client.headers["Accept"] = "application/json"
 
     def _request(self, type, action, data=None):
         url = u"{}/{}/{}/".format(self.base_url, type, action)
-        request = self._client.post(url, data=data)
+        rsp = self._client.post(url, data=data).json()["response"]
+        status = rsp["status"]
 
-        xml = etree.fromstring(request.content)
-        status = {
-            node.tag: node.text
-            for node in xml.xpath("/response/status")[0]
-        }
+        if status["code"] != 200:
+            raise RuntimeError("GleSys API error: {} {} (debug: {!r})".format(
+                status["code"],
+                status["text"],
+                rsp.get("debug"),
+            ))
 
-        if status["code"] != "200":
-            msg = "GleSys API error: {} {}"
-            raise RuntimeError(msg.format(status["code"], status["text"]))
-
-        return xml
+        return rsp
 
     def list_records(self, domain):
-        xml = self._request("domain", "listrecords", {
+        rsp = self._request("domain", "listrecords", {
             "domainname": domain,
         })
 
-        for item in xml.xpath("/response/records/item"):
-            attrs = {node.tag: node.text for node in item}
+        for record in rsp["records"]:
+            # ID and TTL are ints, the int() call is just there for validation
             yield GlesysRecord(
-                id=int(attrs["recordid"]),
-                domain=attrs["domainname"],
-                subdomain=attrs["host"],
-                type=attrs["type"],
-                data=attrs["data"],
-                ttl=attrs["ttl"],
+                id=int(record["recordid"]),
+                domain=record["domainname"],
+                subdomain=record["host"],
+                type=record["type"],
+                data=record["data"],
+                ttl=int(record["ttl"]),
             )
 
     def add_record(self, domain, subdomain, type, data, ttl=None):
@@ -100,9 +98,9 @@ class GlesysDomainApiClient(object):
 
     def list_domains(self):
         """Return an iterator of domain names manageable by the current user"""
-        xml = self._request("domain", "list")
-        for item in xml.xpath("/response/domains/item/domainname"):
-            yield item.text
+        rsp = self._request("domain", "list")
+        for domain in rsp["domains"]:
+            yield domain["domainname"]
 
     def split_domain(self, domain):
         """

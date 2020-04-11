@@ -20,7 +20,6 @@ setup(
     install_requires=[
         "acme>=0.17.0",
         "certbot>=0.17.0",
-        "lxml",
         "requests",
         "zope.interface>=4.4.0",
     ],
