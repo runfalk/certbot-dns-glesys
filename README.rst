@@ -25,7 +25,7 @@ instead.
 
 .. code-block::
 
-   $ sudo rpm -i https://github.com/runfalk/certbot-glesys/releases/download/1.0.0/python3-certbot-dns-glesys-1.0.0-1.fedora31.noarch.rpm
+   $ sudo dnf install https://github.com/runfalk/certbot-glesys/releases/download/1.0.0/python3-certbot-dns-glesys-1.0.0-1.fedora31.noarch.rpm
 
 If you use another RPM based distribution you may be able to build it yourself.
 
