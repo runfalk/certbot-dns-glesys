@@ -32,7 +32,7 @@ If you use another RPM based distribution you may be able to build it yourself.
 .. code-block::
 
    $ source /etc/os-release
-   $ python setup.py bdist_rpm --release="1.${ID}${VERSION_ID}"
+   $ PKG_NAME_OVERRIDE="python3-certbot-dns-glesys" python setup.py bdist_rpm --release="1.${ID}${VERSION_ID}"
 
 PRs are welcome for other distributions.
 
