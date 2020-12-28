@@ -8,6 +8,8 @@ certbot certonly \
     --config-dir tmp/etc/ \
     --logs-dir tmp/log/ \
     --work-dir tmp/run/ \
-    --authenticator certbot-glesys:auth \
-    --certbot-glesys:auth-credentials credentials.ini \
+    --test-cert \
+    --dry-run \
+    --authenticator dns-glesys \
+    --dns-glesys-credentials credentials.ini \
     -d $1

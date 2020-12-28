@@ -5,17 +5,17 @@ import zope.interface
 
 from certbot.plugins.dns_common import DNSAuthenticator
 from certbot.interfaces import IAuthenticator, IPluginFactory
-from collections import namedtuple
 from requests import Session
 from requests.auth import HTTPBasicAuth
+from typing import NamedTuple
 
 
 logger = logging.getLogger(__name__)
 
 
-class DomainParts(namedtuple("DomainParts", ["domain", "subdomain"])):
-    def __new__(cls, domain, subdomain=None):
-        return super(DomainParts, cls).__new__(cls, domain, subdomain)
+class DomainParts(NamedTuple):
+    domain: str
+    subdomain: str = None
 
     def iter_variants(self):
         sub_parts = []
@@ -30,14 +30,13 @@ class DomainParts(namedtuple("DomainParts", ["domain", "subdomain"])):
             )
 
 
-GlesysRecord = namedtuple("GlesysRecord", [
-    "id",
-    "domain",
-    "subdomain",
-    "type",
-    "data",
-    "ttl",
-])
+class GlesysRecord(NamedTuple):
+    id: int
+    domain: str
+    subdomain: str
+    type: str
+    data: str
+    ttl: int
 
 
 class GlesysDomainApiClient(object):
@@ -134,13 +133,12 @@ class GlesysAuthenticator(DNSAuthenticator):
     ttl = 60
 
     def __init__(self, *args, **kwargs):
-        super(GlesysAuthenticator, self).__init__(*args, **kwargs)
-        self._client = None
+        super().__init__(*args, **kwargs)
         self.credentials = None
 
     @classmethod
     def add_parser_arguments(cls, add, default_propagation_seconds=90):
-        super(GlesysAuthenticator, cls).add_parser_arguments(add, default_propagation_seconds)
+        super().add_parser_arguments(add, default_propagation_seconds)
         add("credentials", help="GleSYS API credentials INI file.")
 
     def more_info(self):

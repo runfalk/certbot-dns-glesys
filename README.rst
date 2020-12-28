@@ -15,7 +15,7 @@ a Python virtual environment as *root* and install it there.
    $ python3 -m venv --prompt=certbot certbot
    $ source certbot/bin/activate
    $ pip install --upgrade pip setuptools
-   $ pip install certbot-glesys
+   $ pip install certbot-dns-glesys
 
 You can now run Certbot using ``/root/certbot/bin/certbot``.
 
@@ -25,14 +25,16 @@ instead.
 
 .. code-block::
 
-   $ sudo dnf install https://github.com/runfalk/certbot-glesys/releases/download/1.0.0/python3-certbot-dns-glesys-1.0.0-1.fedora31.noarch.rpm
+   $ sudo dnf install https://github.com/runfalk/certbot-dns-glesys/releases/download/2.0.0/python3-certbot-dns-glesys-2.0.0-1.fedora33.noarch.rpm
 
 If you use another RPM based distribution you may be able to build it yourself.
+On Fedora I install `rpmdevtools` before this. Note that this command must not
+be run inside a virtualenv (or the installation path will be incorrect). You can
+verify the installation path using `rpm -qpl dist/*.rpm`.
 
 .. code-block::
 
-   $ source /etc/os-release
-   $ PKG_NAME_OVERRIDE="python3-certbot-dns-glesys" python setup.py bdist_rpm --release="1.${ID}${VERSION_ID}"
+   $ ./make_rpm.sh
 
 PRs are welcome for other distributions.
 
@@ -51,15 +53,15 @@ to be able to run the client from anywhere, enter ``0.0.0.0/0``.
 
 To use the authenticator you need to provide some required options:
 
-``--certbot-glesys:auth-credentials`` *(required)*
+``--dns-glesys-credentials`` *(required)*
   INI file with ``user`` and ``password`` for your GlesSYS API user.
 
 The credentials file must have the following format:
 
 .. code-block::
 
-   certbot_glesys:auth_user = CL00000
-   certbot_glesys:auth_password = apikeygoeshere
+   dns_glesys_user = CL00000
+   dns_glesys_password = apikeygoeshere
 
 For safety reasons the file must not be world readable. You can solve this by
 running:
@@ -73,13 +75,12 @@ Then you can run ``certbot`` using:
 .. code-block::
 
    $ certbot certonly \
-       --authenticator certbot-glesys:auth \
-       --certbot-glesys:auth-credentials credentials.ini \
+       --authenticator dns-glesys \
+       --dns-glesys-credentials credentials.ini \
        -d domain.com
 
-If you want to obtain a wildcard certificate you can use the
-``--server https://acme-v02.api.letsencrypt.org/directory`` flag and the domain
-``-d *.domain.com``.
+If you want to obtain a wildcard certificate you can use the the domain
+``-d "*.domain.com"``.
 
 
 Disclaimer
@@ -90,6 +91,20 @@ AB.
 
 Changelog
 =========
+
+Version 2.0.0
+-------------
+Released 28th December 2020
+
+**This is a breaking change. The CLI arguments and the name of the package has
+changed to match other DNS authenticator plugins.**
+
+- Updated name to `certbot-dns-glesys` to match other DNS plugins
+- Move away from legacy Certbot API (means you need to reconfigure your
+  authenticator). All arguments and parameters are now prefix-less
+- Dropped Python 2 support
+- Dropped Python 3.5 support
+
 
 Version 1.0.0
 -------------
