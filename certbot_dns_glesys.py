@@ -1,10 +1,8 @@
 import logging
 import itertools
 import re
-import zope.interface
 
 from certbot.plugins.dns_common import DNSAuthenticator
-from certbot.interfaces import IAuthenticator, IPluginFactory
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from typing import NamedTuple
@@ -39,7 +37,7 @@ class GlesysRecord(NamedTuple):
     ttl: int
 
 
-class GlesysDomainApiClient(object):
+class GlesysDomainApiClient:
     base_url = u"https://api.glesys.com/"
 
     def __init__(self, username, password):
@@ -117,8 +115,6 @@ class GlesysDomainApiClient(object):
         raise ValueError("Unable to find domain in GleSYS control panel")
 
 
-@zope.interface.implementer(IAuthenticator)
-@zope.interface.provider(IPluginFactory)
 class GlesysAuthenticator(DNSAuthenticator):
     """
     GleSYS DNS ACME authenticator.

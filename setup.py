@@ -31,7 +31,7 @@ except:
 
 setup(
     name="certbot-dns-glesys",
-    version="2.0.0",
+    version="2.1.0",
     description="GleSYS DNS authentication plugin for Certbot",
     long_description=long_desc,
     license="BSD",
@@ -43,7 +43,6 @@ setup(
         "acme>=1.8.0",
         "certbot>=1.7.0",
         "requests",
-        "zope.interface>=4.4.0",
     ],
     extras_require={
             "dev": [

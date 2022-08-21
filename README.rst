@@ -92,6 +92,13 @@ AB.
 Changelog
 =========
 
+Version 2.1.0
+-------------
+Released 21st August 2022
+
+- Fixed plugin not being detected by newer certbot versions.
+
+
 Version 2.0.0
 -------------
 Released 28th December 2020
